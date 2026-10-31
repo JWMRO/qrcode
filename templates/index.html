@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code 產生器</title>
+</head>
+<body>
+    <h1>QR Code 產生器</h1>
+
+    <form method="POST">
+        <label for="url">請輸入網址：</label>
+        <input
+            type="text"
+            id="url"
+            name="url"
+            placeholder="example.com"
+            required
+        >
+        <button type="submit">產生 QR Code</button>
+    </form>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    {% if qr_img %}
+    <div class="qr">
+        <p>掃描這個 QR Code：</p>
+        <img src="{{ qr_img }}" alt="QR Code" style="max-width: 300px;">
+        
+        <!-- 新增這一行 -->
+        <div style="margin-top: 16px;">
+            <a href="{{ qr_img }}" download="qrcode.png" 
+              style="display: inline-block; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 6px;">
+                下載 QR Code
+            </a>
+        </div>
+        
+        <p style="font-size: 14px; color: #666; word-break: break-all; margin-top: 12px;">{{ url }}</p>
+    </div>
+{% endif %}
+
+{% if error %}
+    <p style="color: red;">{{ error }}</p>
+{% endif %}
+</body>
+</html>
