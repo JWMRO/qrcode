@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code 產生器</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2026.7.3/core.css">
+    <script type="module" src="https://pyscript.net/releases/2026.7.3/core.js"></script>
+</head>
+<body>
+    <h1>QR Code 產生器</h1>
+
+    <form id="qr-form">
+        <label for="url">請輸入網址：</label>
+        <input
+            type="text"
+            id="url"
+            name="url"
+            placeholder="example.com"
+            required
+        >
+        <button type="submit">產生 QR Code</button>
+    </form>
+
+    <p id="error" role="alert" style="color: red; display: none;"></p>
+
+    <div id="result" style="display: none;">
+        <p>掃描這個 QR Code：</p>
+        <img id="qr-image" alt="QR Code" style="max-width: 300px;">
+        <div style="margin-top: 16px;">
+            <a
+                id="download-link"
+                download="qrcode.svg"
+                style="display: inline-block; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 6px;"
+            >下載 QR Code</a>
+        </div>
+        <p id="url-result" style="font-size: 14px; color: #666; word-break: break-all; margin-top: 12px;"></p>
+    </div>
+
+    <script type="py" src="./main.py" config="./pyscript.json"></script>
+</body>
+</html>
