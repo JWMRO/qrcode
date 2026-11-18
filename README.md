@@ -16,4 +16,4 @@ py -m http.server 8000
 
 - `index.html`：頁面與表單。
 - `main.py`：網址驗證及 QR Code 產生邏輯。
-- `pyscript.json`：PyScript 使用的 Python 套件設定。
+- `pyscript.json`：PyScript 使用的 Python 套件設定。 
