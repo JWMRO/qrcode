@@ -1,8 +1,19 @@
-# 短網址產生器
+# QR Code 產生器
 
-這個靜態網頁使用 PyScript 在瀏覽器中產生短網址，不需要自行架設後端。
+這個專案使用 PyScript 在瀏覽器中執行 Python，輸入網址後即可產生並下載 QR Code SVG。
 
-## 功能與限制
+## 本機執行
 
-- 短碼對應資料儲存在目前瀏覽器的 `localStorage`；同一瀏覽器可開啟短網址，其他裝置或瀏覽器無法解析。
-- GitHub Pages 等靜態託管可發佈此頁面，但不會同步短碼資料。
+在專案根目錄開啟終端機，執行：
+
+```powershell
+py -m http.server 8000
+```
+
+接著用瀏覽器開啟 <http://localhost:8000>。第一次載入時需要連線下載 PyScript 和 `qrcode` 套件。
+
+## 專案檔案
+
+- `index.html`：頁面與表單。
+- `main.py`：網址驗證及 QR Code 產生邏輯。
+- `pyscript.json`：PyScript 使用的 Python 套件設定。
