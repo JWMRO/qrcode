@@ -1,319 +1,43 @@
 <!DOCTYPE html>
-<html lang="zh-Hant-TW">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#f5f7fb">
-    <title>網址連結產生器</title>
-
-    <!-- PyScript -->
-    <link rel="stylesheet" href="https://pyscript.net/releases/2025.11.2/core.css" />
-    <script type="module" src="https://pyscript.net/releases/2025.11.2/core.js"></script>
-
-    <style>
-        :root {
-            color-scheme: light;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            color: #172033;
-            background: #f5f7fb;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 48px 20px;
-        }
-
-        main {
-            width: min(100%, 640px);
-            margin: 0 auto;
-            padding: 32px;
-            border: 1px solid #e1e6ef;
-            border-radius: 16px;
-            background: #fff;
-            box-shadow: 0 12px 36px rgb(23 32 51 / 7%);
-        }
-
-        h1, h2 {
-            margin-top: 0;
-        }
-
-        h1 {
-            margin-bottom: 8px;
-        }
-
-        .note, .muted {
-            color: #596579;
-        }
-
-        .visually-hidden {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
-
-        form {
-            display: flex;
-            gap: 10px;
-            margin-top: 24px;
-        }
-
-        input, button {
-            min-height: 44px;
-            border: 1px solid #cbd3df;
-            border-radius: 8px;
-            font: inherit;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px 12px;
-        }
-
-        button {
-            flex: 0 0 auto;
-            padding: 9px 16px;
-            color: #fff;
-            border-color: #315bd6;
-            background: #315bd6;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #2449b8;
-        }
-
-        button:focus-visible, input:focus-visible, a:focus-visible {
-            outline: 3px solid #9bb4ff;
-            outline-offset: 2px;
-        }
-
-        #result, #history {
-            margin-top: 28px;
-            padding-top: 24px;
-            border-top: 1px solid #e1e6ef;
-        }
-
-        #short-url {
-            margin-bottom: 10px;
-        }
-
-        #history-list {
-            display: grid;
-            gap: 14px;
-            padding-left: 22px;
-        }
-
-        #history-list li {
-            overflow-wrap: anywhere;
-        }
-
-        #history-list a {
-            display: block;
-            margin-bottom: 3px;
-        }
-
-        #status {
-            min-height: 1.5em;
-            margin-bottom: 0;
-        }
-
-        @media (max-width: 520px) {
-            body {
-                padding: 20px 12px;
-            }
-
-            main {
-                padding: 24px 18px;
-            }
-
-            form {
-                flex-direction: column;
-            }
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code 產生器</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2026.7.3/core.css">
+    <script type="module" src="https://pyscript.net/releases/2026.7.3/core.js"></script>
 </head>
 <body>
-    <main>
-        <h1>網址連結產生器</h1>
-        <p class="note">短網址與歷史紀錄只會儲存在這個本機瀏覽器中。請使用 http:// 或 https:// 網址。</p>
+    <h1>QR Code 產生器</h1>
 
-        <form id="shorten-form">
-            <label class="visually-hidden" for="url">要建立連結的網址</label>
-            <input id="url" name="url" type="url" placeholder="https://example.com" autocomplete="url" required>
-            <button type="submit">建立連結</button>
-        </form>
+    <form id="qr-form">
+        <label for="url">請輸入網址：</label>
+        <input
+            type="text"
+            id="url"
+            name="url"
+            placeholder="example.com"
+            required
+        >
+        <button type="submit">產生 QR Code</button>
+    </form>
 
-        <p id="status" role="status" aria-live="polite"></p>
+    <p id="error" role="alert" style="color: red; display: none;"></p>
 
-        <section id="result" aria-labelledby="result-heading" hidden>
-            <h2 id="result-heading">你提供的網址</h2>
-            <a id="short-url"></a>
-            <button id="copy-btn" type="button">複製</button>
-        </section>
+    <div id="result" style="display: none;">
+        <p>掃描這個 QR Code：</p>
+        <img id="qr-image" alt="QR Code" style="max-width: 300px;">
+        <div style="margin-top: 16px;">
+            <a
+                id="download-link"
+                download="qrcode.svg"
+                style="display: inline-block; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 6px;"
+            >下載 QR Code</a>
+        </div>
+        <p id="url-result" style="font-size: 14px; color: #666; word-break: break-all; margin-top: 12px;"></p>
+    </div>
 
-        <section id="history" aria-labelledby="history-heading" hidden>
-            <h2 id="history-heading">歷史紀錄</h2>
-            <ul id="history-list"></ul>
-        </section>
-    </main>
-
-    <script type="py">
-from pyscript import document, window, when
-from pyodide.ffi import create_proxy
-import json
-import re
-
-STORAGE_KEY = "short-url-mappings-v1"
-CODE_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-CODE_LENGTH = 7
-
-form = document.querySelector("#shorten-form")
-url_input = document.querySelector("#url")
-status_message = document.querySelector("#status")
-result_section = document.querySelector("#result")
-short_url_link = document.querySelector("#short-url")
-copy_button = document.querySelector("#copy-btn")
-history_section = document.querySelector("#history")
-history_list = document.querySelector("#history-list")
-
-def is_http_url(value: str) -> bool:
-    try:
-        url = window.URL.new(value)
-        return (url.protocol == "http:" or url.protocol == "https:") and not url.username and not url.password
-    except Exception:
-        return False
-
-def read_mappings() -> dict:
-    stored = window.localStorage.getItem(STORAGE_KEY)
-    if not stored:
-        return {}
-
-    parsed = json.loads(stored)
-    if not isinstance(parsed, dict):
-        raise ValueError("短網址資料格式錯誤。")
-
-    pattern = re.compile(rf"^[{re.escape(CODE_ALPHABET)}]{{{CODE_LENGTH}}}$")
-    for code, destination in parsed.items():
-        if not pattern.match(code) or not isinstance(destination, str) or not is_http_url(destination):
-            raise ValueError("短網址資料格式錯誤。")
-    return parsed
-
-# 初始化
-try:
-    mappings = read_mappings()
-except Exception as e:
-    mappings = {}
-    status_message.textContent = f"無法讀取本機短網址資料：{e} 請檢查瀏覽器儲存空間後重新載入。"
-    form.querySelector("button").disabled = True
-
-def make_code() -> str:
-    random_values = window.Uint32Array.new(CODE_LENGTH)
-    window.crypto.getRandomValues(random_values)
-    return "".join(CODE_ALPHABET[v % len(CODE_ALPHABET)] for v in random_values)
-
-def make_short_url(code: str) -> str:
-    url = window.URL.new(window.location.href)
-    url.search = ""
-    url.hash = f"s={code}"
-    return url.href
-
-def render_history():
-    history_list.replaceChildren()
-    entries = list(mappings.items())[::-1]
-    history_section.hidden = len(entries) == 0
-
-    for code, destination in entries:
-        item = document.createElement("li")
-        short_link = document.createElement("a")
-        short_link.href = destination
-        short_link.textContent = destination
-        item.append(short_link)
-        history_list.append(item)
-
-def redirect_if_short_link():
-    hash_str = window.location.hash[1:] if window.location.hash else ""
-    params = window.URLSearchParams.new(hash_str)
-    short_code = params.get("s")
-    if not short_code:
-        return
-
-    destination = mappings.get(short_code)
-    if destination:
-        window.location.replace(destination)
-        return
-
-    status_message.textContent = "找不到這個短網址。它可能是在其他瀏覽器建立，或已清除本機資料。"
-
-hashchange_handler = create_proxy(redirect_if_short_link)
-window.addEventListener("hashchange", hashchange_handler)
-
-@when("submit", "#shorten-form")
-def on_submit(event):
-    event.preventDefault()
-    destination = url_input.value.strip()
-
-    if not is_http_url(destination):
-        status_message.textContent = "請輸入有效的 http:// 或 https:// 網址。"
-        url_input.focus()
-        return
-
-    # 檢查是否已存在相同網址
-    existing_code = None
-    for code, dest in mappings.items():
-        if dest == destination:
-            existing_code = code
-            break
-
-    code = existing_code
-    if not code:
-        for _ in range(10):
-            candidate = make_code()
-            if candidate not in mappings:
-                code = candidate
-                break
-
-    if not code:
-        status_message.textContent = "目前無法產生唯一短碼，請再試一次。"
-        return
-
-    if not existing_code:
-        updated = {**mappings, code: destination}
-        try:
-            window.localStorage.setItem(STORAGE_KEY, json.dumps(updated, ensure_ascii=False))
-            mappings.clear()
-            mappings.update(updated)
-        except Exception as e:
-            status_message.textContent = f"無法儲存短網址：{e} 請檢查瀏覽器儲存空間。"
-            return
-
-    short_url_link.href = destination
-    short_url_link.textContent = destination
-    result_section.hidden = False
-    status_message.textContent = "這個網址已存在，已顯示原有連結。" if existing_code else "連結已產生並儲存。"
-    render_history()
-
-@when("click", "#copy-btn")
-async def on_copy(event):
-    try:
-        await window.navigator.clipboard.writeText(short_url_link.textContent)
-        status_message.textContent = "網址已複製。"
-    except Exception as e:
-        status_message.textContent = f"無法複製網址：{e} 請在網址上按右鍵並選擇複製連結網址。"
-        short_url_link.focus()
-
-# 初始化畫面
-render_history()
-redirect_if_short_link()
-    </script>
+    <script type="py" src="./main.py" config="./pyscript.json"></script>
 </body>
 </html>
+
